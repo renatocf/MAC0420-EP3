@@ -219,6 +219,46 @@ window.onload = function init() {
         console.log(tipo_curva);
     };
 
+    canvas_1.onmousedown = function (evt) {
+        var X = evt.clientX;
+        var Y = evt.clientY;
+        var rst = viewportToCanonicalCoordinates(X, Y, canvas_1, 1);
+        var canX = rst[0];
+        var canY = rst[1];
+
+        console.log("Canvas1");
+        console.log(canX);
+        console.log(canY);
+        console.log(X);
+        console.log(Y);
+
+        switch (evt.which) {
+            case 1:
+                var newPoint = vec4(canX, canY, 0.0, 1.0);
+                pointsArray_1.push(newPoint);
+        }
+    };
+
+    canvas_2.onmousedown = function (evt) {
+        var X = evt.clientX;
+        var Y = evt.clientY;
+        var rst = viewportToCanonicalCoordinates(X, Y, canvas_2, 2);
+        var canX = rst[0];
+        var canY = rst[1];
+
+        console.log("Canvas2");
+        console.log(canX);
+        console.log(canY);
+        console.log(X);
+        console.log(Y);
+
+        switch (evt.which) {
+            case 1:
+                var newPoint = vec4(canX, canY, 0.0, 1.0);
+                pointsArray_2.push(newPoint);
+        }
+    };
+
     gl_3.uniform4fv(gl_3.getUniformLocation(program_3, "ambientProduct"),
        flatten(ambientProduct));
     gl_3.uniform4fv(gl_3.getUniformLocation(program_3, "diffuseProduct"),
@@ -304,3 +344,19 @@ function createBuffers() {
 }
 
 
+function viewportToCanonicalCoordinates(x, y, canvas, id_canvas) {
+    var vp_right = canvas.width;
+    var vp_top = canvas.height;
+    var can_x;
+    var can_y;
+
+    // "Move" o canvas para o canto esquerdo da tela.
+    if (id_canvas == 2)
+        x = x - canvas.width;
+
+    can_x = (x * (2/vp_right)) - 1;
+    // Point (0, 0) in canvas is the upper left coner.
+    can_y = 1 - (y * (2/vp_top));
+
+    return [can_x, can_y];
+}
