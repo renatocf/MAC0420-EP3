@@ -76,6 +76,18 @@ var subdivisões = 1;
 var desvio = 1;
 var tipo_curva = 1; //default B-spline.
 
+var canX_1;
+var canY_1;
+var canX_2;
+var canY_2;
+
+var mousedown1 = false;
+var mousedown2 = false;
+var mousemove1 = false;
+var mousemove2 = false;
+var indice_ponto_1;
+var indice_ponto_2;
+
 // generate a quadrilateral with triangles
 function quad(a, b, c, d) {
 
@@ -226,16 +238,11 @@ window.onload = function init() {
         var canX = rst[0];
         var canY = rst[1];
 
-        console.log("Canvas1");
-        console.log(canX);
-        console.log(canY);
-        console.log(X);
-        console.log(Y);
+        indice_ponto_1 = pontoClicado(canX, canY, 1);
 
         switch (evt.which) {
             case 1:
-                var newPoint = vec4(canX, canY, 0.0, 1.0);
-                pointsArray_1.push(newPoint);
+                mousedown1 = true;
         }
     };
 
@@ -246,18 +253,90 @@ window.onload = function init() {
         var canX = rst[0];
         var canY = rst[1];
 
-        console.log("Canvas2");
-        console.log(canX);
-        console.log(canY);
-        console.log(X);
-        console.log(Y);
+        indice_ponto_2 = pontoClicado(canX, canY, 2);
 
         switch (evt.which) {
             case 1:
-                var newPoint = vec4(canX, canY, 0.0, 1.0);
-                pointsArray_2.push(newPoint);
+                mousedown2 = true;
         }
     };
+
+    canvas_1.onmousemove = function (evt) {
+        var actualX = evt.clientX;
+        var actualY = evt.clientY;
+        var rst = viewportToCanonicalCoordinates(actualX, actualY, canvas_1, 1);
+        var actualcanX = rst[0];
+        var actualcanY = rst[1];
+
+        if (mousedown1) {
+            mousemove1 = true;            
+
+            console.log("indice_ponto");
+            console.log(indice_ponto_1);
+
+            pointsArray_1[indice_ponto_1][0] = actualcanX;
+            pointsArray_1[indice_ponto_1][1] = actualcanY;
+        }
+
+    };
+
+    canvas_2.onmousemove = function (evt) {
+        var actualX = evt.clientX;
+        var actualY = evt.clientY;
+        var rst = viewportToCanonicalCoordinates(actualX, actualY, canvas_2, 2);
+        var actualcanX = rst[0];
+        var actualcanY = rst[1];
+
+        if (mousedown2) {
+            mousemove2 = true;
+
+            console.log("indice_ponto");
+            console.log(indice_ponto_2);
+
+            pointsArray_2[indice_ponto_2][0] = actualcanX;
+            pointsArray_2[indice_ponto_2][1] = actualcanY;
+        }
+
+    };
+
+    canvas_1.onmouseup = function (evt) {
+        var X = evt.clientX;
+        var Y = evt.clientY;
+        var rst = viewportToCanonicalCoordinates(X, Y, canvas_1, 1);
+        var canX = rst[0];
+        var canY = rst[1];
+
+        switch (evt.which) {
+            case 1:
+                mousedown1 = false;
+                if (!mousemove1) {
+                    var newPoint = vec4(canX, canY, 0.0, 1.0);
+                    pointsArray_1.push(newPoint);
+                }
+                mousemove1 = false;
+
+        }
+    };
+
+    canvas_2.onmouseup = function (evt) {
+        var X = evt.clientX;
+        var Y = evt.clientY;
+        var rst = viewportToCanonicalCoordinates(X, Y, canvas_2, 2);
+        var canX = rst[0];
+        var canY = rst[1];
+
+        switch (evt.which) {
+            case 1:
+                mousedown2 = false;
+                if (!mousemove2) {
+                    var newPoint = vec4(canX, canY, 0.0, 1.0);
+                    pointsArray_2.push(newPoint);
+                }
+                mousemove2 = false;
+        }
+    };
+
+
 
     gl_3.uniform4fv(gl_3.getUniformLocation(program_3, "ambientProduct"),
        flatten(ambientProduct));
@@ -359,4 +438,46 @@ function viewportToCanonicalCoordinates(x, y, canvas, id_canvas) {
     can_y = 1 - (y * (2/vp_top));
 
     return [can_x, can_y];
+}
+
+function pontoClicado(x, y, id_canvas) {
+    var id;
+    var dist = 1000;
+    var dist_aux;
+
+    if (id_canvas == 1) {
+        for (var i = 0; i < pointsArray_1.length; i++) {
+            dist_aux = distancia(pointsArray_1[i][0], pointsArray_1[i][1], x, y);
+                        console.log("dist_aux");
+            console.log(dist_aux);
+            if (dist > dist_aux) {
+                dist = dist_aux;
+                id = i;
+            }
+        }
+    }
+    else {
+        for (var i = 0; i < pointsArray_2.length; i++) {
+            dist_aux = distancia(pointsArray_2[i][0], pointsArray_2[i][1], x, y);
+
+            if (dist > dist_aux) {
+                dist = dist_aux;
+                id = i;
+            }
+        }
+    }
+
+    console.log("id");
+    console.log(id);
+    return id;
+}
+
+function distancia(xp, yp, x, y) {
+    var d = (xp - x) + (yp - y);
+    if (d < 0)
+        d = -d;
+
+    console.log("dist");
+    console.log(d);
+    return d;
 }
