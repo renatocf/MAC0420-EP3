@@ -71,18 +71,24 @@ var modelViewMatrixLoc_1, projectionMatrixLoc_1;
 var modelViewMatrixLoc_2, projectionMatrixLoc_2;
 var modelViewMatrixLoc_3, projectionMatrixLoc_3;
 
+// Matriz de rotação do objeto 3D.
+var rotationMatrix = mat4(1);
+var rotationMatrixLoc;
+// Centroide e raio da trackball que envolve o objeto 3D.
+var centroid;
+var radius;
+
 var grau_poli = 1;
 var subdivisões = 1;
 var desvio = 1;
 var tipo_curva = 1; //default B-spline.
 
-var canX_1;
-var canY_1;
-var canX_2;
-var canY_2;
+var lastcanX;
+var lastcanY;
 
 var mousedown1 = false;
 var mousedown2 = false;
+var mousedown3 = false;
 var mousemove1 = false;
 var mousemove2 = false;
 var indice_ponto_1;
@@ -186,11 +192,15 @@ window.onload = function init() {
     modelViewMatrixLoc_3 = gl_3.getUniformLocation(program_3, "modelViewMatrix");
     projectionMatrixLoc_3 = gl_3.getUniformLocation(program_3, "projectionMatrix");
 
+    // create rotation matrix
+    rotationMatrixLoc = gl_3.getUniformLocation(program_3, "rotationMatrix");
+
     document.getElementById("clear").onclick = function() {
     	pointsArray_1 = [];
     	pointsArray_2 = [];
     	pointsArray_3 = [];
     	normalsArray_3 = [];
+        rotationMatrix = mat4(1);
     };
 
     document.getElementById("ok_graup").onclick = function() {
@@ -236,13 +246,12 @@ window.onload = function init() {
         var Y = evt.clientY;
         var rst = viewportToCanonicalCoordinates(X, Y, canvas_1, 1);
         var canX = rst[0];
-        var canY = rst[1];
-
-        indice_ponto_1 = pontoClicado(canX, canY, 1);
+        var canY = rst[1];        
 
         switch (evt.which) {
             case 1:
                 mousedown1 = true;
+                indice_ponto_1 = pontoClicado(canX, canY, 1);
         }
     };
 
@@ -251,13 +260,28 @@ window.onload = function init() {
         var Y = evt.clientY;
         var rst = viewportToCanonicalCoordinates(X, Y, canvas_2, 2);
         var canX = rst[0];
-        var canY = rst[1];
-
-        indice_ponto_2 = pontoClicado(canX, canY, 2);
+        var canY = rst[1];        
 
         switch (evt.which) {
             case 1:
                 mousedown2 = true;
+                indice_ponto_2 = pontoClicado(canX, canY, 2);
+        }
+    };
+
+    canvas_3.onmousedown = function (evt) {
+        var X = evt.clientX;
+        var Y = evt.clientY;
+        var rst = viewportToCanonicalCoordinates(X, Y, canvas_3, 3);
+        lastcanX = rst[0];
+        lastcanY = rst[1];        
+
+        switch (evt.which) {
+            case 1:
+                mousedown3 = true;
+                var rsp = boundingSphereRadiusCenter(pointsArray_3);
+                radius = rsp[0]; 
+                centroid = rsp[1];                               
         }
     };
 
@@ -299,6 +323,22 @@ window.onload = function init() {
 
     };
 
+    canvas_3.onmousemove = function (evt) {
+        var actualX = evt.clientX;
+        var actualY = evt.clientY;
+        var rst = viewportToCanonicalCoordinates(actualX, actualY, canvas_3, 3);
+        var actualcanX = rst[0];
+        var actualcanY = rst[1];
+
+        if (mousedown3) {
+            var trackball_obj = new Trackball(centroid, radius);
+
+            rotationMatrix = mult(rotationMatrix,
+                        trackball_obj.rotation(lastcanX, lastcanY, actualcanX, actualcanY, 'm'));
+        }
+
+    };
+
     canvas_1.onmouseup = function (evt) {
         var X = evt.clientX;
         var Y = evt.clientY;
@@ -314,7 +354,6 @@ window.onload = function init() {
                     pointsArray_1.push(newPoint);
                 }
                 mousemove1 = false;
-
         }
     };
 
@@ -336,7 +375,12 @@ window.onload = function init() {
         }
     };
 
-
+    canvas_3.onmouseup = function (evt) {
+        switch (evt.which) {
+            case 1:
+                mousedown3 = false;
+        }
+    };
 
     gl_3.uniform4fv(gl_3.getUniformLocation(program_3, "ambientProduct"),
        flatten(ambientProduct));
@@ -381,6 +425,7 @@ var render = function() {
 
     gl_3.uniformMatrix4fv(modelViewMatrixLoc_3, false, flatten(modelViewMatrix));
     gl_3.uniformMatrix4fv(projectionMatrixLoc_3, false, flatten(projectionMatrix));
+    gl_3.uniformMatrix4fv(rotationMatrixLoc, false, flatten(rotationMatrix));
     gl_3.drawArrays( gl_3.TRIANGLES, 0, pointsArray_3.length );
 
     requestAnimFrame(render);
@@ -432,6 +477,8 @@ function viewportToCanonicalCoordinates(x, y, canvas, id_canvas) {
     // "Move" o canvas para o canto esquerdo da tela.
     if (id_canvas == 2)
         x = x - canvas.width;
+    if (id_canvas == 3)
+        x = x - (canvas.width*2);
 
     can_x = (x * (2/vp_right)) - 1;
     // Point (0, 0) in canvas is the upper left coner.
@@ -448,7 +495,7 @@ function pontoClicado(x, y, id_canvas) {
     if (id_canvas == 1) {
         for (var i = 0; i < pointsArray_1.length; i++) {
             dist_aux = distancia(pointsArray_1[i][0], pointsArray_1[i][1], x, y);
-                        console.log("dist_aux");
+            console.log("dist_aux");
             console.log(dist_aux);
             if (dist > dist_aux) {
                 dist = dist_aux;
@@ -459,7 +506,6 @@ function pontoClicado(x, y, id_canvas) {
     else {
         for (var i = 0; i < pointsArray_2.length; i++) {
             dist_aux = distancia(pointsArray_2[i][0], pointsArray_2[i][1], x, y);
-
             if (dist > dist_aux) {
                 dist = dist_aux;
                 id = i;
@@ -481,3 +527,43 @@ function distancia(xp, yp, x, y) {
     console.log(d);
     return d;
 }
+
+function boundingSphereRadiusCenter(points) {
+    var dimension_maxX = -1000;
+    var dimension_maxY = -1000;
+    var dimension_maxZ = -1000;
+    var dimension_minX = 1000;
+    var dimension_minY = 1000;
+    var dimension_minZ = 1000;
+
+    for (var i = 0; i < points.length; i++) {
+        if (dimension_maxX < points[i][0])
+            dimension_maxX = points[i][0];
+        if (dimension_maxY < points[i][1])
+            dimension_maxY = points[i][1];
+        if (dimension_maxZ < points[i][2])
+            dimension_maxZ = points[i][2];
+
+        if (dimension_minX > points[i][0])
+            dimension_minX = points[i][0];
+        if (dimension_minY > points[i][1])
+            dimension_minY = points[i][1];
+        if (dimension_minZ > points[i][2])
+            dimension_minZ = points[i][2];
+    }
+
+    var diameter = Math.sqrt(
+        Math.pow(dimension_maxX - dimension_minX, 2)
+        + Math.pow(dimension_maxY - dimension_minY, 2)
+        + Math.pow(dimension_maxZ - dimension_minZ, 2)
+    );
+
+    var centroid = vec3(
+        (dimension_maxX + dimension_minX)/2,
+        (dimension_maxY + dimension_minY)/2,
+        (dimension_maxZ + dimension_minZ)/2
+    );
+
+    return [diameter/2, centroid];
+}
+
