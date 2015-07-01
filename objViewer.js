@@ -10,19 +10,23 @@ var program_3;
 var canvas_3;
 var gl_3;
 
-var pointsArray_1 = [
+var pointsArray_1 = [];
+var pointsCurve_1 = [];
+var pointsCtrl_1 = [
         vec4( -0.25, -0.25,  0.0, 1.0 ),
         vec4( -0.25,  0.25,  0.0, 1.0 ),
         vec4( 0.25,  0.25,  0.0, 1.0 ),
         vec4( 0.25, -0.25,  0.0, 1.0 )
-	];
+];
 
-var pointsArray_2 = [
+var pointsArray_2 = []; 
+var pointsCurve_2 = [];
+var pointsCtrl_2 = [
         vec4( -0.5, -0.5,  0.0, 1.0 ),
         vec4( -0.5,  0.5,  0.0, 1.0 ),
         vec4( 0.5,  0.5,  0.0, 1.0 ),
         vec4( 0.5, -0.5,  0.0, 1.0 )
-	];
+    ];
 
 var pointsArray_3 = [];
 var normalsArray_3 = [];
@@ -78,8 +82,8 @@ var rotationMatrixLoc;
 var centroid;
 var radius;
 
-var grau_poli = 1;
-var subdivisões = 1;
+var grau_poli = 3;
+var subdivisões = 50;
 var desvio = 1;
 var tipo_curva = 1; //default B-spline.
 
@@ -93,6 +97,8 @@ var mousemove1 = false;
 var mousemove2 = false;
 var indice_ponto_1;
 var indice_ponto_2;
+
+
 
 // generate a quadrilateral with triangles
 function quad(a, b, c, d) {
@@ -298,8 +304,11 @@ window.onload = function init() {
             console.log("indice_ponto");
             console.log(indice_ponto_1);
 
-            pointsArray_1[indice_ponto_1][0] = actualcanX;
-            pointsArray_1[indice_ponto_1][1] = actualcanY;
+            pointsCtrl_1[indice_ponto_1][0] = actualcanX;
+            pointsCtrl_1[indice_ponto_1][1] = actualcanY;
+            pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões);
+            pointsArray_1 = [];
+            pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);
         }
 
     };
@@ -317,8 +326,11 @@ window.onload = function init() {
             console.log("indice_ponto");
             console.log(indice_ponto_2);
 
-            pointsArray_2[indice_ponto_2][0] = actualcanX;
-            pointsArray_2[indice_ponto_2][1] = actualcanY;
+            pointsCtrl_2[indice_ponto_2][0] = actualcanX;
+            pointsCtrl_2[indice_ponto_2][1] = actualcanY;
+            pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões);
+            pointsArray_2 = [];
+            pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);            
         }
 
     };
@@ -351,7 +363,11 @@ window.onload = function init() {
                 mousedown1 = false;
                 if (!mousemove1) {
                     var newPoint = vec4(canX, canY, 0.0, 1.0);
-                    pointsArray_1.push(newPoint);
+                    //pointsArray_1.push(newPoint);
+                    pointsCtrl_1.push(newPoint);
+                    pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões);
+                    pointsArray_1 = [];
+                    pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);                                      
                 }
                 mousemove1 = false;
         }
@@ -369,7 +385,10 @@ window.onload = function init() {
                 mousedown2 = false;
                 if (!mousemove2) {
                     var newPoint = vec4(canX, canY, 0.0, 1.0);
-                    pointsArray_2.push(newPoint);
+                    pointsCtrl_2.push(newPoint);
+                    pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões);
+                    pointsArray_2 = [];
+                    pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
                 }
                 mousemove2 = false;
         }
@@ -381,6 +400,20 @@ window.onload = function init() {
                 mousedown3 = false;
         }
     };
+
+    //pointsCurve_2 = bspline_points (pointsArray_2, grau_poli, subdivisões);
+    //console.log(pontosCurva);
+
+    //pon = bspline_points (pointsArray_1, grau_poli, subdivisões);
+    pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões);
+    pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
+    pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões);
+    pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);
+
+    console.log("Tamanhos!");
+    console.log(pointsCtrl_1.length);
+    console.log(pointsCurve_1.length);
+    console.log(pointsArray_1.length);
 
     gl_3.uniform4fv(gl_3.getUniformLocation(program_3, "ambientProduct"),
        flatten(ambientProduct));
@@ -406,6 +439,8 @@ var render = function() {
     gl_1.clear( gl_1.COLOR_BUFFER_BIT | gl_1.DEPTH_BUFFER_BIT);
     gl_2.clear( gl_2.COLOR_BUFFER_BIT | gl_2.DEPTH_BUFFER_BIT);
     gl_3.clear( gl_3.COLOR_BUFFER_BIT | gl_3.DEPTH_BUFFER_BIT);
+    gl_1.lineWidth(2);
+    gl_2.lineWidth(2);
             
     eye = vec3(cradius * Math.sin(ctheta) * Math.cos(cphi),
                cradius * Math.sin(ctheta) * Math.sin(cphi), 
@@ -417,16 +452,20 @@ var render = function() {
 
     gl_1.uniformMatrix4fv(modelViewMatrixLoc_1, false, flatten(modelViewMatrix));
     gl_1.uniformMatrix4fv(projectionMatrixLoc_1, false, flatten(projectionMatrix));
-    gl_1.drawArrays( gl_1.POINTS, 0, pointsArray_1.length );
-
+    gl_1.drawArrays( gl_1.POINTS, 0, pointsCtrl_1.length);
+    gl_1.drawArrays( gl_1.LINE_LOOP, 0, pointsCtrl_1.length);
+    gl_1.drawArrays( gl_1.LINE_LOOP, pointsCtrl_1.length, pointsCurve_1.length);
+    
     gl_2.uniformMatrix4fv(modelViewMatrixLoc_2, false, flatten(modelViewMatrix));
     gl_2.uniformMatrix4fv(projectionMatrixLoc_2, false, flatten(projectionMatrix));
-    gl_2.drawArrays( gl_2.POINTS, 0, pointsArray_2.length );
+    gl_2.drawArrays( gl_2.POINTS, 0, pointsCtrl_2.length );
+    gl_2.drawArrays( gl_2.LINE_STRIP, 0, pointsCtrl_2.length );
+    gl_2.drawArrays( gl_2.LINE_STRIP, pointsCtrl_2.length, pointsCurve_2.length );
 
     gl_3.uniformMatrix4fv(modelViewMatrixLoc_3, false, flatten(modelViewMatrix));
     gl_3.uniformMatrix4fv(projectionMatrixLoc_3, false, flatten(projectionMatrix));
     gl_3.uniformMatrix4fv(rotationMatrixLoc, false, flatten(rotationMatrix));
-    gl_3.drawArrays( gl_3.TRIANGLES, 0, pointsArray_3.length );
+    gl_3.drawArrays( gl_3.TRIANGLES, 0, pointsArray_3.length );  
 
     requestAnimFrame(render);
 }
@@ -488,13 +527,14 @@ function viewportToCanonicalCoordinates(x, y, canvas, id_canvas) {
 }
 
 function pontoClicado(x, y, id_canvas) {
-    var id;
+    var id = -1;
     var dist = 1000;
     var dist_aux;
 
     if (id_canvas == 1) {
-        for (var i = 0; i < pointsArray_1.length; i++) {
-            dist_aux = distancia(pointsArray_1[i][0], pointsArray_1[i][1], x, y);
+        console.log(pointsCtrl_1.length);
+        for (var i = 0; i < pointsCtrl_1.length; i++) {
+            dist_aux = distancia(pointsCtrl_1[i][0], pointsCtrl_1[i][1], x, y);
             console.log("dist_aux");
             console.log(dist_aux);
             if (dist > dist_aux) {
@@ -504,8 +544,8 @@ function pontoClicado(x, y, id_canvas) {
         }
     }
     else {
-        for (var i = 0; i < pointsArray_2.length; i++) {
-            dist_aux = distancia(pointsArray_2[i][0], pointsArray_2[i][1], x, y);
+        for (var i = 0; i < pointsCtrl_2.length; i++) {
+            dist_aux = distancia(pointsCtrl_2[i][0], pointsCtrl_2[i][1], x, y);
             if (dist > dist_aux) {
                 dist = dist_aux;
                 id = i;
@@ -566,4 +606,30 @@ function boundingSphereRadiusCenter(points) {
 
     return [diameter/2, centroid];
 }
+
+/*function insert_point(newPoint, points) {
+    var points_aux = [];
+
+    if (points.length == 0) {
+        points_aux.push(newPoint);
+        return points_aux;
+    }
+
+    for (var i = 0; i < points.length-1; i++) {
+        if (newPoint[0] >= points[i][0] && newPoint[0] <= points[i+1][0]) {
+            points_aux.push(points[i]);
+            points_aux.push(newPoint);
+            for (var j = i+1; j < points.length; j++)
+                points_aux.push(points[j]);
+            return points_aux;
+        }
+        else {
+            points_aux.push(points[i]);
+        }
+    }
+    points_aux.push(points[points.length-1]);
+    points_aux.push(newPoint);
+    return points_aux;
+}*/
+
 
