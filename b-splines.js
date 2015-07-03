@@ -51,7 +51,14 @@ function bspline_points (pontosControle, grau, segmentos) {
 
  	// cria o vetor de nos.
 	for (var i = 0; i <= m; i++) {
-		nos.push(i/m);
+		if (i < grau+1)
+			nos.push(0);
+		else if (i < m-(grau+1)) {
+			var aux = m - (2*grau + 1);
+			nos.push(i/aux);
+		}
+		else
+			nos.push(1);
 		//nos.push(i);
 	}
 		
