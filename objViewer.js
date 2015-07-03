@@ -90,7 +90,7 @@ var radius;
 
 var grau_poli = 3; // valor defaut.
 var subdivisões = 50; // valor default.
-var desvio = 1; // valor default.
+var desvio = 0.5; // valor default.
 var tipo_curva = 1; //default B-spline.
 
 var lastcanX;
@@ -208,10 +208,10 @@ window.onload = function init() {
     rotationMatrixLoc = gl_3.getUniformLocation(program_3, "rotationMatrix");
 
     document.getElementById("clear").onclick = function() {
-    	pointsArray_1 = [];
-        pointsCtrl_1 = [];
-    	pointsArray_2 = [];
-        pointsCtrl_2 = [];
+    	pointsCtrl_1 = [];
+        pointsArray_1 = [];
+    	pointsCtrl_2 = [];
+        pointsArray_2 = [];
     	pointsArray_3 = [];
     	normalsArray_3 = [];
         rotationMatrix = mat4(1);
@@ -221,11 +221,11 @@ window.onload = function init() {
         var g = document.getElementById("graup").value;
         grau_poli = parseInt(g);
         if (tipo_curva == 1) {
-            pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões);
+            pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões, 'f');
             pointsArray_1 = [];
             pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);
 
-            pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões);
+            pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões, 'a');
             pointsArray_2 = [];
             pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
         }          
@@ -235,24 +235,31 @@ window.onload = function init() {
         var s = document.getElementById("subd").value;
         subdivisões = parseInt(s);
         if (tipo_curva == 1) {
-            pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões);
-            pointsArray_1 = [];
-            pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);
-
-            pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões);
-            pointsArray_2 = [];
-            pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
+            pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões, 'f');            
+            pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões, 'a');
         }
         else {
-            // Curva RaG!
-        }        
+            pointsCurve_1 = rag_points(pointsCtrl_1, grau_poli, subdivisões, 'f');
+            pointsCurve_2 = rag_points(pointsCtrl_2, grau_poli, subdivisões, 'a');           
+        }
+
+        pointsArray_1 = [];
+        pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1); 
+        pointsArray_2 = [];
+        pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);       
     }; 
 
     document.getElementById("ok_desvio").onclick = function() {
         var d = document.getElementById("desvio").value;
         desvio = parseFloat(d);
         if (tipo_curva == 2) {
-            // Desenha curva RaG!!!
+            pointsCurve_1 = rag_points(pointsCtrl_1, grau_poli, subdivisões, 'f');
+            pointsArray_1 = [];
+            pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);
+
+            pointsCurve_2 = rag_points(pointsCtrl_2, grau_poli, subdivisões, 'a');
+            pointsArray_2 = [];
+            pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
         }
     };
 
@@ -265,22 +272,20 @@ window.onload = function init() {
 
         if (curva == "B-spline") {
             tipo_curva = 1;
-            pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões);
-            pointsArray_1 = [];
-            pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);
-
-            pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões);
-            pointsArray_2 = [];
-            pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
+            pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões, 'f');            
+            pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões, 'a');
         }
         else {
             tipo_curva = 2;
-            // Desenha curva RaG!!
+            pointsCurve_1 = rag_points(pointsCtrl_1, grau_poli, subdivisões, 'f');
+            pointsCurve_2 = rag_points(pointsCtrl_2, grau_poli, subdivisões, 'a');
         }
 
-        console.log("curva");
-        console.log(curva);
-        console.log(tipo_curva);
+        pointsArray_1 = [];
+        pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1); 
+        pointsArray_2 = [];
+        pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
+
     };
 
     canvas_1.onmousedown = function (evt) {
@@ -343,15 +348,15 @@ window.onload = function init() {
             pointsCtrl_1[indice_ponto_1][0] = actualcanX;
             pointsCtrl_1[indice_ponto_1][1] = actualcanY;
             if (tipo_curva == 1) {
-                pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões);
-                pointsArray_1 = [];
-                pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);
+                pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões, 'f');                
             }
             else {
-                // Curvas RaG!!!
+                pointsCurve_1 = rag_points(pointsCtrl_1, desvio, subdivisões, 'f');
             }
-        }
 
+            pointsArray_1 = [];
+            pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);
+        }
     };
 
     canvas_2.onmousemove = function (evt) {
@@ -370,13 +375,14 @@ window.onload = function init() {
             pointsCtrl_2[indice_ponto_2][0] = actualcanX;
             pointsCtrl_2[indice_ponto_2][1] = actualcanY;
             if (tipo_curva == 1) {
-                pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões);
-                pointsArray_2 = [];
-                pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
+                pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões, 'a');                
             }
             else {
-                // Curvas RaG!!!!
-            }            
+                pointsCurve_2 = rag_points(pointsCtrl_2, desvio, subdivisões, 'a');
+            }
+
+            pointsArray_2 = [];
+            pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);            
         }
 
     };
@@ -409,16 +415,15 @@ window.onload = function init() {
                 mousedown1 = false;
                 if (!mousemove1) {
                     var newPoint = vec4(canX, canY, 0.0, 1.0);
-                    //pointsArray_1.push(newPoint);
                     pointsCtrl_1.push(newPoint);
                     if (tipo_curva == 1) {
-                        pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões);
-                        pointsArray_1 = [];
-                        pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);
+                        pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões, 'f');                        
                     }
                     else {
-                        // Curva RaG!!
-                    }                                      
+                        pointsCurve_1 = rag_points(pointsCtrl_1, grau_poli, subdivisões, 'f');
+                    }
+                    pointsArray_1 = [];
+                    pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);                                      
                 }
                 mousemove1 = false;
         }
@@ -438,13 +443,13 @@ window.onload = function init() {
                     var newPoint = vec4(canX, canY, 0.0, 1.0);
                     pointsCtrl_2.push(newPoint);
                     if (tipo_curva == 1) {
-                        pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões);
-                        pointsArray_2 = [];
-                        pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
+                        pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões, 'a');
                     }
                     else {
-                        // Curva RaG!!!!
+                        pointsCurve_2 = rag_points(pointsCtrl_2, grau_poli, subdivisões, 'a');
                     }
+                    pointsArray_2 = [];
+                    pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
                 }
                 mousemove2 = false;
         }
@@ -457,19 +462,15 @@ window.onload = function init() {
         }
     };
 
-    //pointsCurve_2 = bspline_points (pointsArray_2, grau_poli, subdivisões);
-    //console.log(pontosCurva);
-
-    //pon = bspline_points (pointsArray_1, grau_poli, subdivisões);
-    pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões);
+    pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões, 'a');
     pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
-    pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões);
+    pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões, 'f');
     pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);
 
-    console.log("Tamanhos!");
+    /*console.log("Tamanhos!");
     console.log(pointsCtrl_1.length);
     console.log(pointsCurve_1.length);
-    console.log(pointsArray_1.length);
+    console.log(pointsArray_1.length);*/
 
     gl_3.uniform4fv(gl_3.getUniformLocation(program_3, "ambientProduct"),
        flatten(ambientProduct));
