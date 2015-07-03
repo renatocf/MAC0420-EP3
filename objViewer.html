@@ -11,6 +11,8 @@
 	attribute vec4 vPosition;
 	uniform mat4 modelViewMatrix;
 	uniform mat4 projectionMatrix;
+  uniform vec4 color;
+  varying vec4 fColor;
 
 	void
 	main()
@@ -18,16 +20,20 @@
     	gl_Position = projectionMatrix * modelViewMatrix * vPosition;
 
     	gl_PointSize = 5.0;
+
+      fColor = color;
 	}
   </script>
 
   <script id="fragment-shader-1" type="x-shader/x-fragment">
 	precision mediump float;
+  varying vec4 fColor;
 
 	void
 	main()
 	{
-    	gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
+    	//gl_FragColor = vec4( 0.0, 0.0, 1.0, 1.0 );
+      gl_FragColor = fColor;
 	}
   </script>
 
@@ -35,6 +41,8 @@
 	attribute vec4 vPosition;
 	uniform mat4 modelViewMatrix;
 	uniform mat4 projectionMatrix;
+  uniform vec4 color;
+  varying vec4 fColor;
 
 	void
 	main()
@@ -42,16 +50,20 @@
    		gl_Position = projectionMatrix * modelViewMatrix * vPosition;
 
     	gl_PointSize = 5.0;
+
+      fColor = color;
 	}
   </script>
 
   <script id="fragment-shader-2" type="x-shader/x-fragment">
 	precision mediump float;
+  varying vec4 fColor;
 
 	void
 	main()
 	{
-    	gl_FragColor = vec4( 0.0, 1.0, 0.0, 1.0 );
+    	//gl_FragColor = vec4( 0.0, 1.0, 0.0, 1.0 );
+      gl_FragColor = fColor;
 	}
   </script>
 
@@ -67,6 +79,8 @@
 
     uniform mat4 modelViewMatrix;
     uniform mat4 projectionMatrix;
+    // rotate matrix
+    uniform mat4 rotationMatrix;
     uniform vec4 lightPosition;
 
     void main()
@@ -98,9 +112,10 @@
 
         gl_Position = projectionMatrix
                       * modelViewMatrix
+                      * rotationMatrix
                       * vPosition;
 
-        fColor = ambient + diffuse +specular;
+        fColor = ambient + diffuse + specular;
 
         fColor.a = 1.0;
     }
@@ -121,6 +136,10 @@
   <script type="text/javascript" src="../Common/initShaders.js"></script>
   <script type="text/javascript" src="../Common/MV.js"></script>
   <script type="text/javascript" src="objViewer.js"></script>
+  <script type="text/javascript" src="matrix.js"></script>
+  <script type="text/javascript" src="quaternion.js"></script>
+  <script type="text/javascript" src="trackball.js"></script>
+  <script type="text/javascript" src="b-splines.js"></script>
 
   </head>
 

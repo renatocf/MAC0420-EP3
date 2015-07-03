@@ -52,6 +52,12 @@ var materialDiffuse = vec4( 1.0, 0.8, 0.0, 1.0);
 var materialSpecular = vec4( 1.0, 0.8, 0.0, 1.0 );
 var materialShininess = 100.0;
 
+var color_blue = vec4( 0.5, 0.7, 1.0, 1.0 );
+var color_white = vec4( 0.7, 0.7, 0.7, 1.0 );
+var color_darkblue = vec4( 0.0, 0.2, 0.8, 1.0 );
+var color_green = vec4( 0.4, 1.0, 0.4, 1.0 );
+var color_darkgreen = vec4( 0.0, 0.8, 0.0, 1.0 );
+
 // camera definitions
 var eye = vec3(1.0, 0.0, 0.0);
 var at = vec3(0.0, 0.0, 0.0);
@@ -452,14 +458,32 @@ var render = function() {
 
     gl_1.uniformMatrix4fv(modelViewMatrixLoc_1, false, flatten(modelViewMatrix));
     gl_1.uniformMatrix4fv(projectionMatrixLoc_1, false, flatten(projectionMatrix));
+
+    gl_1.uniform4fv(gl_1.getUniformLocation(program_1, "color"),
+                  flatten(color_blue) );
     gl_1.drawArrays( gl_1.POINTS, 0, pointsCtrl_1.length);
+
+    gl_1.uniform4fv(gl_1.getUniformLocation(program_1, "color"),
+                  flatten(color_white) );
     gl_1.drawArrays( gl_1.LINE_LOOP, 0, pointsCtrl_1.length);
-    gl_1.drawArrays( gl_1.LINE_LOOP, pointsCtrl_1.length, pointsCurve_1.length);
+
+    gl_1.uniform4fv(gl_1.getUniformLocation(program_1, "color"),
+                  flatten(color_darkblue) );
+    gl_1.drawArrays( gl_1.LINE_STRIP, pointsCtrl_1.length, pointsCurve_1.length);
     
     gl_2.uniformMatrix4fv(modelViewMatrixLoc_2, false, flatten(modelViewMatrix));
     gl_2.uniformMatrix4fv(projectionMatrixLoc_2, false, flatten(projectionMatrix));
+
+    gl_2.uniform4fv(gl_2.getUniformLocation(program_2, "color"),
+                  flatten(color_green) );    
     gl_2.drawArrays( gl_2.POINTS, 0, pointsCtrl_2.length );
+
+    gl_2.uniform4fv(gl_2.getUniformLocation(program_2, "color"),
+                  flatten(color_white) );
     gl_2.drawArrays( gl_2.LINE_STRIP, 0, pointsCtrl_2.length );
+
+    gl_2.uniform4fv(gl_2.getUniformLocation(program_2, "color"),
+                  flatten(color_darkgreen) );
     gl_2.drawArrays( gl_2.LINE_STRIP, pointsCtrl_2.length, pointsCurve_2.length );
 
     gl_3.uniformMatrix4fv(modelViewMatrixLoc_3, false, flatten(modelViewMatrix));
