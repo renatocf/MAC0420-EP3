@@ -43,16 +43,21 @@ function rag_points(pontosControle, desvio, subdivisoes, fOUa) {
  		dist = dist + distance(pontosControle[i], pontosControle[i+1]);
  	}
 
- 	/*for (var i = 0; i < n; i++) {
+  	for (var i = 0; i < n; i++) {
  		nos.push(dist*i);
- 	}*/
-
- 	for (var i = 0; i < n; i++) {
- 		nos.push(i/n);
  	}
 
+ 	/*for (var i = 0; i < n; i++) {
+ 		nos.push(i/n);
+ 	}*/
+
+ 	/*for (var i = 0; i < n; i++) {
+ 		nos.push((dist*i)/n);
+ 	}*/
+
  	for (var i = 0; i <= subdivisoes; i++) {
-		var t = i/subdivisoes;
+		//var t = i/subdivisoes;
+		var t = i;
 		var p = rag_function(pontosControle, desvio, t, nos, fOUa);
 		pontos.push(p);
 	}
@@ -71,8 +76,8 @@ function gaussian(desvio, nos, t, n, fOUa) {
 	var G = [];
 	var soma = 0;
 
-	var min = Math.ceil((-desvio) * Math.sqrt((-2) * Math.log(0.0000001)));
-	var max = Math.ceil(desvio * Math.sqrt((-2) * Math.log(0.0000001)));
+	var min = Math.ceil((-desvio) * Math.sqrt((-2) * Math.log(0.000001)));
+	var max = Math.ceil(desvio * Math.sqrt((-2) * Math.log(0.000001)));
 
 	if (fOUa == 'f') {
 		// Não está funcionando essa curva fechada!!!
