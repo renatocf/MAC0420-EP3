@@ -303,9 +303,6 @@ window.onload = function init() {
         if (mousedown1) {
             mousemove1 = true;
 
-            console.log("indice_ponto");
-            console.log(indice_ponto_1);
-
             pointsCtrl_1[indice_ponto_1][0] = actualcanX;
             pointsCtrl_1[indice_ponto_1][1] = actualcanY;
 
@@ -322,9 +319,6 @@ window.onload = function init() {
 
         if (mousedown2) {
             mousemove2 = true;
-
-            console.log("indice_ponto");
-            console.log(indice_ponto_2);
 
             pointsCtrl_2[indice_ponto_2][0] = actualcanX;
             pointsCtrl_2[indice_ponto_2][1] = actualcanY;
@@ -532,11 +526,8 @@ function pontoClicado(x, y, id_canvas) {
     var dist_aux;
 
     if (id_canvas == 1) {
-        console.log(pointsCtrl_1.length);
         for (var i = 0; i < pointsCtrl_1.length; i++) {
             dist_aux = distancia(pointsCtrl_1[i][0], pointsCtrl_1[i][1], x, y);
-            console.log("dist_aux");
-            console.log(dist_aux);
             if (dist > dist_aux) {
                 dist = dist_aux;
                 id = i;
@@ -552,9 +543,6 @@ function pontoClicado(x, y, id_canvas) {
             }
         }
     }
-
-    console.log("id");
-    console.log(id);
     return id;
 }
 
