@@ -18,7 +18,7 @@ RaG.prototype = Object.create(Curve.prototype);
  */
 function RaG(std_deviation, ctrlPoints, closed) {
     Curve.call(this, ctrlPoints, closed);
-    this.std_deviation = std_deviation;
+    this.std_deviation = std_deviation / 10;
 
     this.ctrlPoints = [];
     for (var i = 0; i < ctrlPoints.length; i++) {

@@ -40,7 +40,7 @@
 
     Por padrão, ao carregar a página serão exibidos uma curva B-Spline
     de grau 3, com 50 subdivisões. O desvio-padrão das curvas RaGs
-    é 0.1. Para trocar entre as curvas, basta selecionar uma das opções
+    é 1. Para trocar entre as curvas, basta selecionar uma das opções
     do radio box, que recarregará a figura automaticamente, baseada nos
     mesmos pontos de controle.
     

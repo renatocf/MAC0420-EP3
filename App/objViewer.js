@@ -94,7 +94,7 @@ var radius;
 
 var degree = 3; // default value.
 var num_subdivisions = 50; // default value.
-var std_deviation = 0.1; // default value.
+var std_deviation = 1; // default value.
 var curve_type = 1; //default B-spline.
 
 var lastcanX;
