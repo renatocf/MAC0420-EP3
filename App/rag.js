@@ -12,9 +12,9 @@ RaG.prototype = Object.create(Curve.prototype);
 /**
  * RaG constructor
  * Class representing RaG curves
- * @param degree           Degree of B-spline polynomials
- * @param ctrlPoints       Vector of control points
- * @param closed           Boolean to indicate if curve is closed
+ * @param degree      Degree of B-spline polynomials
+ * @param ctrlPoints  Vector of control points
+ * @param closed      Boolean to indicate if curve is closed
  */
 function RaG(std_deviation, ctrlPoints, closed) {
     Curve.call(this, ctrlPoints, closed);
@@ -32,21 +32,18 @@ function RaG(std_deviation, ctrlPoints, closed) {
 
     this.knots = [];
     for (var i = 0; i < this.ctrlPoints.length; i++) {
-        //this.knots.push(distance * i);
         this.knots.push(i/this.ctrlPoints.length);
-        //this.knots.push(i*this.std_deviation);
     }
 }
 
 /**
  * Generate weights to build curve points for control points
- * @param t Parameter of the curve to be calculated
  * @param num_subdivisions Number of subdivisions to interpolate points
  * @return Array of values with weights for each curve interval
  */
-RaG.prototype.generateCtrlPointWeights = function(t, num_subdivisions) {
+RaG.prototype.generateCtrlPointWeights = function(t) {
 
-    var gaussian = this.gaussian(t/num_subdivisions);
+    var gaussian = this.gaussian(t);
     var normalized_gaussian = [];
 
     var sum = 0;

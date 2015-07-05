@@ -31,7 +31,7 @@ Curve.prototype.generatePoints = function(num_subdivisions) {
     var points = [];
 
     for (var i = 0; i <= num_subdivisions; i++)
-        points.push(this.generatePoint(i, num_subdivisions));
+        points.push(this.generatePoint(i/num_subdivisions));
 
     return points;
 }
@@ -42,9 +42,9 @@ Curve.prototype.generatePoints = function(num_subdivisions) {
  * @param num_subdivisions Number of subdivisions to interpolate points
  * @return Point in the curve
  */
-Curve.prototype.generatePoint = function(t, num_subdivisions) {
+Curve.prototype.generatePoint = function(t) {
     var point = vec4(0.0, 0.0, 0.0, 1.0);
-    var weights = this.generateCtrlPointWeights(t, num_subdivisions);
+    var weights = this.generateCtrlPointWeights(t);
 
     for (var i = 0; i < this.ctrlPoints.length; i++) {
         point[0] += weights[i] * this.ctrlPoints[i][0];

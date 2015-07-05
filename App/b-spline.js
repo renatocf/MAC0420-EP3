@@ -12,9 +12,9 @@ BSpline.prototype = Object.create(Curve.prototype);
 /**
  * B-Spline constructor
  * Class representing B-Spline curves
- * @param degree           Degree of B-spline polynomials
- * @param ctrlPoints       Vector of control points
- * @param closed           Boolean to indicate if curve is closed
+ * @param degree      Degree of B-spline polynomials
+ * @param ctrlPoints  Vector of control points
+ * @param closed      Boolean to indicate if curve is closed
  */
 function BSpline(degree, ctrlPoints, closed) {
     Curve.call(this, ctrlPoints, closed);
@@ -43,15 +43,14 @@ function BSpline(degree, ctrlPoints, closed) {
 
 /**
  * Generate weights to build curve points for control points
- * @param t Parameter of the curve to be calculated
  * @param num_subdivisions Number of subdivisions to interpolate points
  * @return Array of values with weights for each curve interval
  */
-BSpline.prototype.generateCtrlPointWeights = function(t, num_subdivisions) {
+BSpline.prototype.generateCtrlPointWeights = function(t) {
     var base = [];
 
     for (var i = 0; i < this.ctrlPoints.length; i++)
-        base[i] = this.coxDeBoor(t/num_subdivisions, this.degree+1, i);
+        base[i] = this.coxDeBoor(t, this.degree+1, i);
 
     return base;
 }
