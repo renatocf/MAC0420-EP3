@@ -32,7 +32,9 @@ function RaG(std_deviation, ctrlPoints, closed) {
 
     this.knots = [];
     for (var i = 0; i < this.ctrlPoints.length; i++) {
-        this.knots.push(distance * i);
+        //this.knots.push(distance * i);
+        this.knots.push(i/this.ctrlPoints.length);
+        //this.knots.push(i*this.std_deviation);
     }
 }
 
@@ -44,7 +46,7 @@ function RaG(std_deviation, ctrlPoints, closed) {
  */
 RaG.prototype.generateCtrlPointWeights = function(t, num_subdivisions) {
 
-    var gaussian = this.gaussian(t);
+    var gaussian = this.gaussian(t/num_subdivisions);
     var normalized_gaussian = [];
 
     var sum = 0;

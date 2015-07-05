@@ -43,7 +43,7 @@ Curve.prototype.generatePoints = function(num_subdivisions) {
  * @return Point in the curve
  */
 Curve.prototype.generatePoint = function(t, num_subdivisions) {
-    var point = vec4(0, 0, 0, 1);
+    var point = vec4(0.0, 0.0, 0.0, 1.0);
     var weights = this.generateCtrlPointWeights(t, num_subdivisions);
 
     for (var i = 0; i < this.ctrlPoints.length; i++) {

@@ -94,7 +94,7 @@ var radius;
 
 var degree = 3; // default value.
 var num_subdivisions = 50; // default value.
-var std_deviation = 0.5; // default value.
+var std_deviation = 0.1; // default value.
 var curve_type = 1; //default B-spline.
 
 var lastcanX;
@@ -605,31 +605,6 @@ function boundingSphereRadiusCenter(points) {
 
     return [diameter/2, centroid];
 }
-
-/*function insert_point(newPoint, points) {
-    var points_aux = [];
-
-    if (points.length == 0) {
-        points_aux.push(newPoint);
-        return points_aux;
-    }
-
-    for (var i = 0; i < points.length-1; i++) {
-        if (newPoint[0] >= points[i][0] && newPoint[0] <= points[i+1][0]) {
-            points_aux.push(points[i]);
-            points_aux.push(newPoint);
-            for (var j = i+1; j < points.length; j++)
-                points_aux.push(points[j]);
-            return points_aux;
-        }
-        else {
-            points_aux.push(points[i]);
-        }
-    }
-    points_aux.push(points[points.length-1]);
-    points_aux.push(newPoint);
-    return points_aux;
-}*/
 
 function update_curves() {
     if (curve_type == 1) {
