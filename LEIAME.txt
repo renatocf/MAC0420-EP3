@@ -1,0 +1,60 @@
+
+3º Exercício-Programa de MAC0420 - Computação Gráfica
+======================================================
+
+* Helena Almeida Victoretti - 7991124
+* Renato Cordeiro Ferreira  - 7990933
+
+* Diretórios
+
+    Este programa contém 2 diretórios:
+    - App, com os arquivos .html, .js e .css;
+    - Common, com utilitários JavaScript para comunicação com o WebGL.
+
+* Instruções para uso do software
+
+    Para utilizar o programa, basta abrir o arquivo App/objViewer.html
+    em um browser com suporte para WebGL.
+
+    A tela está dividida em 3 canvas: o primeiro, para desenhar uma
+    curva do tipo B-Spline (padrão) ou RaG fechada; o segundo, para
+    criar uma curva do mesmo tipo da primeira, aberta; o terceiro,
+    para apresentar a extrusão 3D da curva fechada desenhada sobre
+    a curva aberta.
+
+    Para desenhar cada tipo de curva, é necessário definir alguns
+    parâmetros de configuração:
+
+    - B-Splines:
+        - Grau do polinômio: grau máximo dos polinômios de controle
+          utilizados para definir a curva polinomial por partes.
+        - Número de subdivisões: número de amostragens feitas no
+          intervalo de definição da curva, especificando a quantidade de
+          pontos efetivamente gerados na curva. Em geral, quanto maior o
+          número de subdivisões, mais suave será a curva.
+
+    - RaGs:
+        - Desvio-padrão: desvio-padrão da distribuição gaussiana que
+          define a área de atuação de cada ponto de controle.
+        - Número de subdivisões: mesmo que nas B-Splines.
+
+    Por padrão, ao carregar a página serão exibidos uma curva B-Spline
+    de grau 3, com 50 subdivisões. O desvio-padrão das curvas RaGs
+    é 0.1. Para trocar entre as curvas, basta selecionar uma das opções
+    do radio box, que recarregará a figura automaticamente, baseada nos
+    mesmos pontos de controle.
+    
+    Para limpar os canvas e criar novos pontos, basta clicar no botão
+    'Clear All Canvas'. Para adicionar um novo ponto de controle, basta
+    pressionar o botão esquerdo em um dos canvas. Um polígono de
+    controle será desenhado ligando todos os pontos de controle. Colocar
+    pontos de controle em excesso ou em menor quantidade para um dado
+    grau de polinômio / desvio-padrão da B-Spline / RaG pode levar a
+    comportamentos inesperados na curva gerada.
+
+    Por indisponibilidade de tempo e dificuldades em encontrar os
+    vetores tangentes às curvas, o 3º canvas não é capaz de realizar a
+    extrusão da segunda curva com relação à primeira. Entretanto,
+    apresentamos uma figura simplificada para ilustrar a rotação
+    utilizando trackball com quatérnions.
+
