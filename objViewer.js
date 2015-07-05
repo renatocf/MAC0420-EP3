@@ -10,37 +10,41 @@ var program_3;
 var canvas_3;
 var gl_3;
 
+var closedCurve;
+
 var pointsArray_1 = [];
 var pointsCurve_1 = [];
 var pointsCtrl_1 = [
-        vec4( -0.25, -0.25,  0.0, 1.0 ),
-        vec4( -0.25,  0.25,  0.0, 1.0 ),
-        vec4( 0.25,  0.25,  0.0, 1.0 ),
-        vec4( 0.25, -0.25,  0.0, 1.0 )
+    vec4( -0.25, -0.25,  0.0, 1.0 ),
+    vec4( -0.25,  0.25,  0.0, 1.0 ),
+    vec4( 0.25,  0.25,  0.0, 1.0 ),
+    vec4( 0.25, -0.25,  0.0, 1.0 )
 ];
 
-var pointsArray_2 = []; 
+var openCurve;
+
+var pointsArray_2 = [];
 var pointsCurve_2 = [];
 var pointsCtrl_2 = [
-        vec4( -0.5, -0.5,  0.0, 1.0 ),
-        vec4( -0.5,  0.5,  0.0, 1.0 ),
-        vec4( 0.5,  0.5,  0.0, 1.0 ),
-        vec4( 0.5, -0.5,  0.0, 1.0 )
-    ];
+    vec4( -0.5, -0.5,  0.0, 1.0 ),
+    vec4( -0.5,  0.5,  0.0, 1.0 ),
+    vec4( 0.5,  0.5,  0.0, 1.0 ),
+    vec4( 0.5, -0.5,  0.0, 1.0 )
+];
 
 var pointsArray_3 = [];
 var normalsArray_3 = [];
 
 var vertices = [
-        vec4( -0.5, -0.5,  0.5, 1.0 ),
-        vec4( -0.5,  0.5,  0.5, 1.0 ),
-        vec4( 0.5,  0.5,  0.5, 1.0 ),
-        vec4( 0.5, -0.5,  0.5, 1.0 ),
-        vec4( -0.5, -0.5, -0.5, 1.0 ),
-        vec4( -0.5,  0.5, -0.5, 1.0 ),
-        vec4( 0.5,  0.5, -0.5, 1.0 ),
-        vec4( 0.5, -0.5, -0.5, 1.0 )
-    ];
+    vec4( -0.5, -0.5,  0.5, 1.0 ),
+    vec4( -0.5,  0.5,  0.5, 1.0 ),
+    vec4( 0.5,  0.5,  0.5, 1.0 ),
+    vec4( 0.5, -0.5,  0.5, 1.0 ),
+    vec4( -0.5, -0.5, -0.5, 1.0 ),
+    vec4( -0.5,  0.5, -0.5, 1.0 ),
+    vec4( 0.5,  0.5, -0.5, 1.0 ),
+    vec4( 0.5, -0.5, -0.5, 1.0 )
+];
 
 var lightPosition = vec4( 10.0, 10.0, 10.0, 0.0 );
 var lightAmbient = vec4( 0.2, 0.2, 0.2, 1.0 );
@@ -88,10 +92,10 @@ var rotationMatrixLoc;
 var centroid;
 var radius;
 
-var grau_poli = 3; // valor defaut.
-var subdivisões = 50; // valor default.
-var desvio = 0.5; // valor default.
-var tipo_curva = 1; //default B-spline.
+var degree = 3; // default value.
+var num_subdivisions = 50; // default value.
+var std_deviation = 0.5; // default value.
+var curve_type = 1; //default B-spline.
 
 var lastcanX;
 var lastcanY;
@@ -113,18 +117,18 @@ function quad(a, b, c, d) {
      var t2 = subtract(vertices[c], vertices[b]);
      var normal = vec4(cross(t1, t2), 0);
 
-     pointsArray_3.push(vertices[a]); 
-     normalsArray_3.push(normal); 
-     pointsArray_3.push(vertices[b]); 
-     normalsArray_3.push(normal); 
-     pointsArray_3.push(vertices[c]); 
-     normalsArray_3.push(normal);   
-     pointsArray_3.push(vertices[a]);  
-     normalsArray_3.push(normal); 
-     pointsArray_3.push(vertices[c]); 
-     normalsArray_3.push(normal); 
-     pointsArray_3.push(vertices[d]); 
-     normalsArray_3.push(normal);    
+     pointsArray_3.push(vertices[a]);
+     normalsArray_3.push(normal);
+     pointsArray_3.push(vertices[b]);
+     normalsArray_3.push(normal);
+     pointsArray_3.push(vertices[c]);
+     normalsArray_3.push(normal);
+     pointsArray_3.push(vertices[a]);
+     normalsArray_3.push(normal);
+     pointsArray_3.push(vertices[c]);
+     normalsArray_3.push(normal);
+     pointsArray_3.push(vertices[d]);
+     normalsArray_3.push(normal);
 }
 
 
@@ -158,7 +162,7 @@ window.onload = function init() {
     canvas_2.height = canvas_2.clientHeight;
     canvas_3.width = canvas_3.clientWidth;
     canvas_3.height = canvas_3.clientHeight;
-    
+
     // create viewport and clear color
     gl_1.viewport( 0, 0, canvas_1.width, canvas_1.height );
     gl_1.clearColor( 0.5, 0.5, 0.5, 1.0 );
@@ -193,7 +197,7 @@ window.onload = function init() {
     ambientProduct = mult(lightAmbient, materialAmbient);
     diffuseProduct = mult(lightDiffuse, materialDiffuse);
     specularProduct = mult(lightSpecular, materialSpecular);
-    
+
     // create model view and projection matrices
     modelViewMatrixLoc_1 = gl_1.getUniformLocation(program_1, "modelViewMatrix");
     projectionMatrixLoc_1 = gl_1.getUniformLocation(program_1, "projectionMatrix");
@@ -217,75 +221,32 @@ window.onload = function init() {
         rotationMatrix = mat4(1);
     };
 
-    document.getElementById("ok_graup").onclick = function() {
-        var g = document.getElementById("graup").value;
-        grau_poli = parseInt(g);
-        if (tipo_curva == 1) {
-            pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões, 'f');
-            pointsArray_1 = [];
-            pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);
-
-            pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões, 'a');
-            pointsArray_2 = [];
-            pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
-        }          
+    document.getElementById("ok_degree").onclick = function() {
+        degree = parseInt(document.getElementById("degree").value);
+        update_curves();
     };
 
-    document.getElementById("ok_subd").onclick = function() {
-        var s = document.getElementById("subd").value;
-        subdivisões = parseInt(s);
-        if (tipo_curva == 1) {
-            pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões, 'f');            
-            pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões, 'a');
-        }
-        else {
-            pointsCurve_1 = rag_points(pointsCtrl_1, grau_poli, subdivisões, 'f');
-            pointsCurve_2 = rag_points(pointsCtrl_2, grau_poli, subdivisões, 'a');           
-        }
+    document.getElementById("ok_num_subdivisions").onclick = function() {
+        num_subdivisions = parseInt(document.getElementById("num_subdivisions").value);
+        update_curves();
+    };
 
-        pointsArray_1 = [];
-        pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1); 
-        pointsArray_2 = [];
-        pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);       
-    }; 
-
-    document.getElementById("ok_desvio").onclick = function() {
-        var d = document.getElementById("desvio").value;
-        desvio = parseFloat(d);
-        if (tipo_curva == 2) {
-            pointsCurve_1 = rag_points(pointsCtrl_1, grau_poli, subdivisões, 'f');
-            pointsArray_1 = [];
-            pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);
-
-            pointsCurve_2 = rag_points(pointsCtrl_2, grau_poli, subdivisões, 'a');
-            pointsArray_2 = [];
-            pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
-        }
+    document.getElementById("ok_std_deviation").onclick = function() {
+        std_deviation = parseFloat(document.getElementById("std_deviation").value);
+        update_curves();
     };
 
     document.getElementById('rates').onclick = function () {
-        var curva;
+        var curve;
         var fr = document.getElementById('radios').getElementsByTagName('input');
         for (var i = 0; i < fr.length; ++i)
             if (fr[i].type == 'radio' && fr[i].checked)
-                curva = fr[i].value;
+                curve = fr[i].value;
 
-        if (curva == "B-spline") {
-            tipo_curva = 1;
-            pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões, 'f');            
-            pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões, 'a');
-        }
-        else {
-            tipo_curva = 2;
-            pointsCurve_1 = rag_points(pointsCtrl_1, grau_poli, subdivisões, 'f');
-            pointsCurve_2 = rag_points(pointsCtrl_2, grau_poli, subdivisões, 'a');
-        }
+        if (curve == "B-spline") curve_type = 1;
+        else curve_type = 2;
 
-        pointsArray_1 = [];
-        pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1); 
-        pointsArray_2 = [];
-        pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
-
+        update_curves();
     };
 
     canvas_1.onmousedown = function (evt) {
@@ -293,7 +254,7 @@ window.onload = function init() {
         var Y = evt.clientY;
         var rst = viewportToCanonicalCoordinates(X, Y, canvas_1, 1);
         var canX = rst[0];
-        var canY = rst[1];        
+        var canY = rst[1];
 
         switch (evt.which) {
             case 1:
@@ -307,7 +268,7 @@ window.onload = function init() {
         var Y = evt.clientY;
         var rst = viewportToCanonicalCoordinates(X, Y, canvas_2, 2);
         var canX = rst[0];
-        var canY = rst[1];        
+        var canY = rst[1];
 
         switch (evt.which) {
             case 1:
@@ -321,14 +282,14 @@ window.onload = function init() {
         var Y = evt.clientY;
         var rst = viewportToCanonicalCoordinates(X, Y, canvas_3, 3);
         lastcanX = rst[0];
-        lastcanY = rst[1];        
+        lastcanY = rst[1];
 
         switch (evt.which) {
             case 1:
                 mousedown3 = true;
                 var rsp = boundingSphereRadiusCenter(pointsArray_3);
-                radius = rsp[0]; 
-                centroid = rsp[1];                               
+                radius = rsp[0];
+                centroid = rsp[1];
         }
     };
 
@@ -340,22 +301,15 @@ window.onload = function init() {
         var actualcanY = rst[1];
 
         if (mousedown1) {
-            mousemove1 = true;            
+            mousemove1 = true;
 
             console.log("indice_ponto");
             console.log(indice_ponto_1);
 
             pointsCtrl_1[indice_ponto_1][0] = actualcanX;
             pointsCtrl_1[indice_ponto_1][1] = actualcanY;
-            if (tipo_curva == 1) {
-                pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões, 'f');                
-            }
-            else {
-                pointsCurve_1 = rag_points(pointsCtrl_1, desvio, subdivisões, 'f');
-            }
 
-            pointsArray_1 = [];
-            pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);
+            update_curves();
         }
     };
 
@@ -374,18 +328,8 @@ window.onload = function init() {
 
             pointsCtrl_2[indice_ponto_2][0] = actualcanX;
             pointsCtrl_2[indice_ponto_2][1] = actualcanY;
-            if (tipo_curva == 1) {
-                pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões, 'a');                
-            }
-            else {
-                pointsCurve_2 = rag_points(pointsCtrl_2, desvio, subdivisões, 'a');
-                console.log("PONTOS CURVA");
-                console.log(pointsCurve_2);
-            }
 
-            pointsArray_2 = [];
-            pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
-            console.log(pointsArray_2.length);            
+            update_curves();
         }
 
     };
@@ -419,14 +363,8 @@ window.onload = function init() {
                 if (!mousemove1) {
                     var newPoint = vec4(canX, canY, 0.0, 1.0);
                     pointsCtrl_1.push(newPoint);
-                    if (tipo_curva == 1) {
-                        pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões, 'f');                        
-                    }
-                    else {
-                        pointsCurve_1 = rag_points(pointsCtrl_1, grau_poli, subdivisões, 'f');
-                    }
-                    pointsArray_1 = [];
-                    pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);                                      
+
+                    update_curves();
                 }
                 mousemove1 = false;
         }
@@ -445,14 +383,8 @@ window.onload = function init() {
                 if (!mousemove2) {
                     var newPoint = vec4(canX, canY, 0.0, 1.0);
                     pointsCtrl_2.push(newPoint);
-                    if (tipo_curva == 1) {
-                        pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões, 'a');
-                    }
-                    else {
-                        pointsCurve_2 = rag_points(pointsCtrl_2, grau_poli, subdivisões, 'a');
-                    }
-                    pointsArray_2 = [];
-                    pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
+
+                    update_curves();
                 }
                 mousemove2 = false;
         }
@@ -465,25 +397,17 @@ window.onload = function init() {
         }
     };
 
-    pointsCurve_2 = bspline_points(pointsCtrl_2, grau_poli, subdivisões, 'a');
-    pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
-    pointsCurve_1 = bspline_points(pointsCtrl_1, grau_poli, subdivisões, 'f');
-    pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);
-
-    /*console.log("Tamanhos!");
-    console.log(pointsCtrl_1.length);
-    console.log(pointsCurve_1.length);
-    console.log(pointsArray_1.length);*/
+    update_curves();
 
     gl_3.uniform4fv(gl_3.getUniformLocation(program_3, "ambientProduct"),
        flatten(ambientProduct));
     gl_3.uniform4fv(gl_3.getUniformLocation(program_3, "diffuseProduct"),
        flatten(diffuseProduct) );
-    gl_3.uniform4fv(gl_3.getUniformLocation(program_3, "specularProduct"), 
-       flatten(specularProduct) );	
-    gl_3.uniform4fv(gl_3.getUniformLocation(program_3, "lightPosition"), 
-       flatten(lightPosition) );       
-    gl_3.uniform1f(gl_3.getUniformLocation(program_3, 
+    gl_3.uniform4fv(gl_3.getUniformLocation(program_3, "specularProduct"),
+       flatten(specularProduct) );
+    gl_3.uniform4fv(gl_3.getUniformLocation(program_3, "lightPosition"),
+       flatten(lightPosition) );
+    gl_3.uniform1f(gl_3.getUniformLocation(program_3,
        "shininess"),materialShininess);
 
     render();
@@ -495,15 +419,15 @@ var render = function() {
 
     var wrapper = document.getElementById( "gl-wrapper" );
     var ratio = wrapper.clientHeight/wrapper.clientWidth;
-            
+
     gl_1.clear( gl_1.COLOR_BUFFER_BIT | gl_1.DEPTH_BUFFER_BIT);
     gl_2.clear( gl_2.COLOR_BUFFER_BIT | gl_2.DEPTH_BUFFER_BIT);
     gl_3.clear( gl_3.COLOR_BUFFER_BIT | gl_3.DEPTH_BUFFER_BIT);
     gl_1.lineWidth(2);
     gl_2.lineWidth(2);
-            
+
     eye = vec3(cradius * Math.sin(ctheta) * Math.cos(cphi),
-               cradius * Math.sin(ctheta) * Math.sin(cphi), 
+               cradius * Math.sin(ctheta) * Math.sin(cphi),
                cradius * Math.cos(ctheta));
 
     modelViewMatrix = lookAt(eye, at, up);
@@ -524,12 +448,12 @@ var render = function() {
     gl_1.uniform4fv(gl_1.getUniformLocation(program_1, "color"),
                   flatten(color_darkblue) );
     gl_1.drawArrays( gl_1.LINE_STRIP, pointsCtrl_1.length, pointsCurve_1.length);
-    
+
     gl_2.uniformMatrix4fv(modelViewMatrixLoc_2, false, flatten(modelViewMatrix));
     gl_2.uniformMatrix4fv(projectionMatrixLoc_2, false, flatten(projectionMatrix));
 
     gl_2.uniform4fv(gl_2.getUniformLocation(program_2, "color"),
-                  flatten(color_green) );    
+                  flatten(color_green) );
     gl_2.drawArrays( gl_2.POINTS, 0, pointsCtrl_2.length );
 
     gl_2.uniform4fv(gl_2.getUniformLocation(program_2, "color"),
@@ -543,18 +467,17 @@ var render = function() {
     gl_3.uniformMatrix4fv(modelViewMatrixLoc_3, false, flatten(modelViewMatrix));
     gl_3.uniformMatrix4fv(projectionMatrixLoc_3, false, flatten(projectionMatrix));
     gl_3.uniformMatrix4fv(rotationMatrixLoc, false, flatten(rotationMatrix));
-    gl_3.drawArrays( gl_3.TRIANGLES, 0, pointsArray_3.length );  
+    gl_3.drawArrays( gl_3.TRIANGLES, 0, pointsArray_3.length );
 
     requestAnimFrame(render);
 }
-
 
 function createBuffers() {
 
     var vBuffer = gl_1.createBuffer();
     gl_1.bindBuffer( gl_1.ARRAY_BUFFER, vBuffer );
     gl_1.bufferData( gl_1.ARRAY_BUFFER, flatten(pointsArray_1), gl_1.STATIC_DRAW );
-    
+
     var vPosition = gl_1.getAttribLocation(program_1, "vPosition");
     gl_1.vertexAttribPointer(vPosition, 4, gl_1.FLOAT, false, 0, 0);
     gl_1.enableVertexAttribArray(vPosition);
@@ -562,7 +485,7 @@ function createBuffers() {
     var vBuffer = gl_2.createBuffer();
     gl_2.bindBuffer( gl_2.ARRAY_BUFFER, vBuffer );
     gl_2.bufferData( gl_2.ARRAY_BUFFER, flatten(pointsArray_2), gl_2.STATIC_DRAW );
-    
+
     var vPosition = gl_2.getAttribLocation(program_2, "vPosition");
     gl_2.vertexAttribPointer(vPosition, 4, gl_2.FLOAT, false, 0, 0);
     gl_2.enableVertexAttribArray(vPosition);
@@ -570,7 +493,7 @@ function createBuffers() {
     var nBuffer = gl_3.createBuffer();
     gl_3.bindBuffer( gl_3.ARRAY_BUFFER, nBuffer );
     gl_3.bufferData( gl_3.ARRAY_BUFFER, flatten(normalsArray_3), gl_3.STATIC_DRAW );
-    
+
     var vNormal = gl_3.getAttribLocation( program_3, "vNormal" );
     gl_3.vertexAttribPointer( vNormal, 4, gl_3.FLOAT, false, 0, 0 );
     gl_3.enableVertexAttribArray( vNormal );
@@ -578,12 +501,11 @@ function createBuffers() {
     var vBuffer = gl_3.createBuffer();
     gl_3.bindBuffer( gl_3.ARRAY_BUFFER, vBuffer );
     gl_3.bufferData( gl_3.ARRAY_BUFFER, flatten(pointsArray_3), gl_3.STATIC_DRAW );
-    
+
     var vPosition = gl_3.getAttribLocation(program_3, "vPosition");
     gl_3.vertexAttribPointer(vPosition, 4, gl_3.FLOAT, false, 0, 0);
     gl_3.enableVertexAttribArray(vPosition);
 }
-
 
 function viewportToCanonicalCoordinates(x, y, canvas, id_canvas) {
     var vp_right = canvas.width;
@@ -643,14 +565,6 @@ function distancia(xp, yp, x, y) {
     var dist = Math.sqrt(dx*dx + dy*dy);
 
     return dist;
-
-    /*var d = (xp - x) + (yp - y);
-    if (d < 0)
-        d = -d;
-
-    console.log("dist");
-    console.log(d);
-    return d; */
 }
 
 function boundingSphereRadiusCenter(points) {
@@ -717,4 +631,19 @@ function boundingSphereRadiusCenter(points) {
     return points_aux;
 }*/
 
+function update_curves() {
+    if (curve_type == 1) {
+        closedCurve = new BSpline(degree, pointsCtrl_1, true);
+        openCurve = new BSpline(degree, pointsCtrl_2);
+    }
+    else {
+        closedCurve = new RaG(std_deviation, pointsCtrl_1, true);
+        openCurve = new RaG(std_deviation, pointsCtrl_2);
+    }
 
+    pointsCurve_1 = closedCurve.generatePoints(num_subdivisions);
+    pointsCurve_2 = openCurve.generatePoints(num_subdivisions);
+
+    pointsArray_1 = pointsCtrl_1.concat(pointsCurve_1);
+    pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
+}
