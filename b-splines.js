@@ -33,7 +33,7 @@ function bspline_function(pontosControle, grau, t, nos) {
 	ponto[2] = 0.0;
 	ponto[3] = 1.0;	
 	
-	for(var i = 0; i < pontosControle.length; ++i) {
+	for(var i = 0; i < pontosControle.length; i++) {
 		var b = Cox_deBoor(grau+1, t, i, nos);
 		ponto[0] += b * pontosControle[i][0];
 		ponto[1] += b * pontosControle[i][1];
@@ -43,29 +43,45 @@ function bspline_function(pontosControle, grau, t, nos) {
 	return ponto;	
 }
 
-function bspline_points (pontosControle, grau, segmentos) {
+function bspline_points (pontosControle, grau, subdivisoes, fOUa) {
  	var nos = [];
  	var pontos = [];
+ 	var pControle = pontosControle.slice();
 
- 	var m = grau + pontosControle.length;
+ 	var m; 
+
+ 	// Funcionou, a curva está fechada!!
+ 	if (fOUa == 'f') {
+ 		pControle.push(pontosControle[0]);
+ 		pControle.push(pontosControle[1]);
+ 	}
+
+ 	m = grau + pControle.length;
 
  	// cria o vetor de nos.
 	for (var i = 0; i <= m; i++) {
 		if (i < grau+1)
 			nos.push(0);
-		else if (i < m-(grau+1)) {
-			var aux = m - (2*grau + 1);
-			nos.push(i/aux);
+		else if (i < m-grau-1) {
+			//var aux = m - 2*grau - 1;
+			nos.push(i/m);
 		}
 		else
-			nos.push(1);
-		//nos.push(i);
+			nos.push(1); 			
 	}
-		
+	
+	// Funcionou a curva está fechada!
+	if (fOUa == 'f') {
+		console.log("CURVA FECHADA!!");
+		for (var i = 0; i < 2*grau+4; i++)
+			nos.push(nos[i]);
+	}
 
-	for (var i = 0; i <= segmentos; i++) {
-		var t = i/segmentos;
-		var p = bspline_function(pontosControle, grau, t, nos);
+
+
+	for (var i = 0; i <= subdivisoes; i++) {
+		var t = i/subdivisoes;
+		var p = bspline_function(pControle, grau, t, nos);
 		pontos.push(p);
 	}
 

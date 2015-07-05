@@ -379,10 +379,13 @@ window.onload = function init() {
             }
             else {
                 pointsCurve_2 = rag_points(pointsCtrl_2, desvio, subdivisões, 'a');
+                console.log("PONTOS CURVA");
+                console.log(pointsCurve_2);
             }
 
             pointsArray_2 = [];
-            pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);            
+            pointsArray_2 = pointsCtrl_2.concat(pointsCurve_2);
+            console.log(pointsArray_2.length);            
         }
 
     };
@@ -634,13 +637,20 @@ function pontoClicado(x, y, id_canvas) {
 }
 
 function distancia(xp, yp, x, y) {
-    var d = (xp - x) + (yp - y);
+    var dx = xp - x;
+    var dy = yp - y;
+
+    var dist = Math.sqrt(dx*dx + dy*dy);
+
+    return dist;
+
+    /*var d = (xp - x) + (yp - y);
     if (d < 0)
         d = -d;
 
     console.log("dist");
     console.log(d);
-    return d;
+    return d; */
 }
 
 function boundingSphereRadiusCenter(points) {
